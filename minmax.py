@@ -1,4 +1,4 @@
-from gamefield import GameField
+from gamefield_min_max import GameField
 import numpy as np
 from copy import deepcopy
 import time
@@ -30,8 +30,8 @@ roundsCompleted = 0
 if(ROUND_COUNT==0):
 	ROUND_COUNT = 1000000
 
-depth = 8
-gameFieldSize = 8
+depth = 1
+gameFieldSize = 7
 
 #Balancing a win is 100 less worth than a loss
 WINNINGSCOREADDITION = 0
@@ -45,7 +45,7 @@ LOSINGSCOREADDITION3 = 1
 
 
 
-def getMinMaxMove():
+def getMinMaxMove(choice):
 	gamesToPlay = []
 	gamesToPlay1 = []
 	gamesToPlay2 = []
@@ -61,7 +61,7 @@ def getMinMaxMove():
 	depth4Score = []
 	depth5Score = []
 
-	moveProbabiltyScore = [2,2,2,2,2,2,2,2]
+	moveProbabiltyScore = [2,2,2,2,2,2,2]
 
 
 
@@ -111,7 +111,7 @@ def getMinMaxMove():
 							moveProbabiltyScore[moveProbOption] += WINNINGSCOREADDITION		
 				except:
 					print("Invalid move prediction3")
-
+				
 				#Enemy to play 2
 				for i4 in range(gameFieldSize):
 					gamesToPlay3.append(deepcopy(gamesToPlay2[len(gamesToPlay2)-1]))
@@ -126,7 +126,7 @@ def getMinMaxMove():
 						#moveProbOption = np.mod(len(gamesToPlay1)-1, gameFieldSize)
 						#if(moveProbabiltyScore[moveProbOption] >= LOSINGSCOREADDITION2):
 						#	moveProbabiltyScore[moveProbOption] += LOSINGSCOREADDITION2				
-					'''
+					
 					#Me to play 3
 					for i5 in range(gameFieldSize):
 						gamesToPlay4.append(deepcopy(gamesToPlay3[len(gamesToPlay3)-1]))
@@ -151,16 +151,15 @@ def getMinMaxMove():
 								#print("Losing in 3 on line " + str(i4+1) + " if enemy sets " + str(i2+1) + ", (me) " + str(i3+1) + " enemy " + str(i4+1))
 								moveProbOption = i1
 								moveProbabiltyScore[moveProbOption] += LOSINGSCOREADDITION #Not sure if LOSINGADITION3 is better
-							'''
+							
 		
-
-
-	for x in range(gameFieldSize):
-		print(moveProbabiltyScore[x])
-		if(moveProbabiltyScore[x]<bestPickLossesScore):
-			bestPick = x
-			bestPickLossesScore = moveProbabiltyScore[x]
-	return bestPick
+	print("Unsorted list")
+	print(moveProbabiltyScore)
+	s = np.array(moveProbabiltyScore)
+	sort_index = np.argsort(s)
+	print(sort_index)
+	print(sort_index[choice])
+	return sort_index[choice]
 
 
 
@@ -170,26 +169,35 @@ for b in range(ROUND_COUNT-1, 0, -1):
 	user = 0
 	game_over = False
 	game = GameField()
+	loopCheck = 0
 	while not game_over:
+		loopCheck = 0
 		game.print_board()
 
 		if(user == 0):
 			# Ask the user for input, but only accept valid turns
 			valid_move = False
 			while not valid_move:
-				user_move = input(f"{game.which_turn()}'s Turn - pick a column (1-X): ")
+				'''user_move = input(f"{game.which_turn()}'s Turn - pick a column (1-X): ")
 				try:
 					valid_move = game.turn(int(user_move)-1)
 				except:
 					print(f"Please choose a number between 1 and X")
+				'''
+				minMaxMove = -2
+				valid_move = game.turn(getMinMaxMove(loopCheck))
+				loopCheck += 1;
+				time.sleep(0.5)
 			user = 1
 		else:
 			#MinMax function
 			valid_move = False
 			while not valid_move:
 				minMaxMove = -2
-				valid_move = game.turn(getMinMaxMove())
+				valid_move = game.turn(getMinMaxMove(loopCheck))
+				loopCheck += 1;
 				print(f"Please choose a number between 1 and X | " + str(valid_move) + " is not valid.")
+				time.sleep(0.5)
 			user = 0
 
 
